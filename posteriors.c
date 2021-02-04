@@ -30,18 +30,23 @@ void GetRoutes(int *matrix, int len, int ntarg, double *ntrans, int *rec, double
 {
   int run, t;
   double time1;
-  int state[len];
+  int *state;
   double totrate;
-  double rate[len];
-  double cumsum[len];
+  double *rate;
+  double *cumsum;
   double r;
   int i, j;
   int startt;
-  int checker[ntarg];
+  int *checker;
   int numhits;
   double tgap;
   double continuoustime;
 
+  state = (int*)malloc(sizeof(int)*len);
+  rate = (double*)malloc(sizeof(double)*len);
+  cumsum = (double*)malloc(sizeof(double)*len);
+  checker = (int*)malloc(sizeof(int)*ntarg);
+  
   for(i = 0; i < ntarg; i++)
     checker[i] = 0;
 
@@ -140,6 +145,10 @@ void GetRoutes(int *matrix, int len, int ntarg, double *ntrans, int *rec, double
   for(i = 0; i < len; i++)
     mean[i] /= NTRAJ;
 
+  free(state);
+  free(rate);
+  free(cumsum);
+  free(checker);
 }
 
 // construct labels for different features

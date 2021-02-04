@@ -47,11 +47,14 @@ double gsl_ran_gaussian(const double sigma)
 void PickLocus(int *state, double *ntrans, int *targ, int *locus, double *prob, double *beta, int LEN)
 {
   int i, j;
-  double rate[LEN];
+  double *rate;
   double totrate, nobiastotrate;
-  double cumsum[LEN];
+  double *cumsum;
   double r;
 
+  rate = (double*)malloc(sizeof(double)*LEN);
+  cumsum = (double*)malloc(sizeof(double)*LEN);
+  
   nobiastotrate = 0;
 
   /* compute the rate of loss of gene i given the current genome */
@@ -108,6 +111,9 @@ void PickLocus(int *state, double *ntrans, int *targ, int *locus, double *prob, 
 
   *prob = totrate/nobiastotrate;
   *beta = nobiastotrate;
+
+  free(rate);
+  free(cumsum);
 }
 
 
@@ -119,11 +125,11 @@ double LikelihoodMultiple(int *targ, double *P, int LEN, int *startpos, double t
   double *reject;
   int i, j, r;
   int locus;
-  int attempt[LEN];
+  int *attempt;
   double min;
   double mean;
   double *prodreject;
-  double summand[LEN];
+  double *summand;
   int fail, score;
   int *hits;
   double totalsum;
@@ -145,6 +151,9 @@ double LikelihoodMultiple(int *targ, double *P, int LEN, int *startpos, double t
   prodreject = (double*)malloc(sizeof(double)*BANK);
   recbeta = (double*)malloc(sizeof(double)*LEN*BANK);
 
+  attempt = (int*)malloc(sizeof(int)*LEN);
+  summand = (double*)malloc(sizeof(double)*LEN);
+  
   // initialise each trajectory at the start state; count 0s and 1s
   for(i = 0; i < LEN*BANK; i++)
     bank[i] = startpos[i%LEN]; 
@@ -231,6 +240,9 @@ double LikelihoodMultiple(int *targ, double *P, int LEN, int *startpos, double t
   free(prodreject);
   free(recbeta);
 
+  free(attempt);
+  free(summand);
+
   return prob_path;
 }
 
@@ -240,8 +252,10 @@ double GetLikelihoodCoalescentChange(int *matrix, int len, int ntarg, double *nt
   double loglik, tloglik, tlik;
   int i, j;
   int multiple;
-  int startpos[len];
+  int *startpos;
 
+  startpos = (int*)malloc(sizeof(int)*len);
+  
   // initialise and start at one corner of the hypercube
   loglik = 0;
   for(i = 0; i < len; i++)
@@ -274,6 +288,8 @@ double GetLikelihoodCoalescentChange(int *matrix, int len, int ntarg, double *nt
       loglik += tloglik;
     }
 
+  free(startpos);
+  
   // return total log likelihood
   return loglik;
 }
