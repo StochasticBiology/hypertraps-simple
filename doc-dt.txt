@@ -4,7 +4,7 @@ HyperTraPS(-DT) documentation
 
 --- Summary ---
 
-HyperTraPS (hypercubic transition path sampling) is an algorithm for inferring the likely dynamic pathways that give rise to a series of observations. These observations consist of binary strings describing the presence (1) or absence (0) of each of L traits of interest. HyperTraPS can broadly be thought of as a Hidden Markov Model where the state space is the L-hypercube where each vertex is one of these strings and an edge exists between vertices whose strings differ in exactly one place.
+HyperTraPS (hypercubic transition path sampling) is an algorithm for inferring the likely dynamic pathways that give rise to a series of observations. These observations consist of binary strings describing the presence (1) or absence (0) of each of L traits of interest. HyperTraPS can broadly be thought of as a Hidden Markov Model where the state space is the L-hypercube where each vertex is one of these strings and an edge exists between vertices whose strings differ in exactly one place. The -DT appendix stands for "discrete time"; the continuous time analogue is under development.
 
 If you use HyperTraPS please cite the original paper Johnston & Williams, Cell Systems 2, 101-111 (2016), and/or the methods paper Greenbury et al., Cell Systems 10, 39-51 (2020).
 
@@ -108,4 +108,4 @@ The output of posteriors.ce includes a simple summary of the dynamics inferred b
 
 So, for example, plotting column 3 horizontally, column 1 vertically, and column 5 as colour or point size will give a heatmap-style summary plot of the inferred dynamics.
 
-There is also a [output file]-routes.txt file which stores samples of individual trajectories supported by the inferred parameters. Here, each row is an ordered list of the features that are acquired/lost over one simulation of the system.
+If you call posteriors.c with 1 as the first argument (as opposed to 0 above), there is also a [output file]-routes.txt file which stores samples of individual trajectories supported by the inferred parameters. Here, each row is an ordered list of the features that are acquired/lost over one simulation of the system.
