@@ -18,6 +18,8 @@ then run it with
 
 This compiles and runs the source code, and runs a quick instance of HyperTraPS on an example synthetic data file. If Gnuplot is installed it will also produce a summary plot.
 
+IMPORTANT NOTE: this simple demo script performs NO checking about the performance of HyperTraPS. This is a really simple test file and the parameters used will not in general be sufficient to get converged results for bigger/more complex data. The script demo-parallel-dt.sh runs several chains in parallel and visualises the corresponding output as a first check for convergence; better approaches like Gelman-Rubin are recommended in more formal settings.
+
 --- Code and I/O ---
 
 hypertraps-dt.c is C source code for HyperTraPS inference.
