@@ -103,12 +103,14 @@ Example phylogenetic data:
 (NB) note that "before" and "after" states here are identical, indicating an absence of any transition. Such observations are not used by HyperTraPS-DT (but are used in continuous-time HyperTraPS).
 
 The data file input to HyperTraPS contains these transitions arranged in pairs of rows, so that each odd-numbered row contains a "before" state and the subsequent even-number row contains the corresponding "after" state. Presence/absence markers are separated by spaces. So our first example would be 
-`0 0 0 0 0 0 0  
+```
+0 0 0 0 0 0 0  
 1 0 0 1 0 1 0  
 0 0 0 0 0 0 0  
 1 0 0 0 1 0 1  
 0 0 0 0 0 0 0  
-0 1 1 0 1 0 1`
+0 1 1 0 1 0 1
+```
 
 Output files 
 ---
