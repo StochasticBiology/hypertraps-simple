@@ -81,11 +81,12 @@ Example phylogenetic data:
 
 HyperTraPS requires data in the form of pairs of observations -- a "before" and an "after" state. For independent data, the "before" state is taken to be 000... for each pair, as each instance of the system independently starts from the same initial state. For longitudinal data, the pairs are the ith and (i+1)th observations from a longitudinal chain. For phylogenetic data, the pairs are ancestor and descendant vertices on the phylogeny. An independent algorithm must be used to infer the states associated with ancestral nodes. A convenient choice for this is the "maximum parsimony" approach, where traits present in all an ancestor's descendants are assumed to also have been present in the ancestor.
 
-Hence, for our examples:
+Hence, for our examples -- example independent data:
 * 0000000 -> 1001010
 * 0000000 -> 1000101
 * 0000000 -> 0110101`
 
+Example longitudinal data:
 * 0000000 -> 0000100
 * 0000100 -> 0110100
 * 0110100 -> 1110101
@@ -93,6 +94,7 @@ Hence, for our examples:
 * 0010001 -> 0110001
 * 0110001 -> 0110001 (NB)
 
+Example phylogenetic data:
 * 0000000 -> 0000001
 * 0000000 -> 1001000
 * 1001000 -> 1001000 (NB)
@@ -101,11 +103,11 @@ Hence, for our examples:
 (NB) note that "before" and "after" states here are identical, indicating an absence of any transition. Such observations are not used by HyperTraPS-DT (but are used in continuous-time HyperTraPS).
 
 The data file input to HyperTraPS contains these transitions arranged in pairs of rows, so that each odd-numbered row contains a "before" state and the subsequent even-number row contains the corresponding "after" state. Presence/absence markers are separated by spaces. So our first example would be 
-`0 0 0 0 0 0 0
-1 0 0 1 0 1 0
-0 0 0 0 0 0 0
-1 0 0 0 1 0 1
-0 0 0 0 0 0 0
+`0 0 0 0 0 0 0  
+1 0 0 1 0 1 0  
+0 0 0 0 0 0 0  
+1 0 0 0 1 0 1  
+0 0 0 0 0 0 0  
 0 1 1 0 1 0 1`
 
 Output files 
