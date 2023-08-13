@@ -497,7 +497,7 @@ int main(int argc, char *argv[])
 	{
 	  // if we're burnt in, periodically sample the current parameterisation to an output file
 	  fp = fopen(shotstr, "a");
-	  for(i = 0; i < len*(len+1); i++)
+	  for(i = 0; i < len*len; i++)
 	    fprintf(fp, "%f ", trans[i]);
 	  fprintf(fp, "\n");
 	  fclose(fp);
