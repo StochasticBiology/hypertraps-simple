@@ -57,15 +57,15 @@ void PickLocus(int *state, double *ntrans, int *targ, int *locus, double *prob, 
   
   nobiastotrate = 0;
 
-  /* compute the rate of loss of gene i given the current genome */
+  /* compute the rate of loss of gene i given the current genome -- without bias */
   for(i = 0; i < LEN; i++)
     {
-      /* ntrans must be the transition matrix. ntrans[0]-ntrans[LEN] are the bare rates. then ntrans[LEN+j*LEN+i] is the modifier for i from j*/
+      /* ntrans must be the transition matrix. ntrans[i+i*LEN] is the bare rate for i. then ntrans[j*LEN+i] is the modifier for i from j*/
       if(state[i] == 0)
 	{
-	  rate[i] = ntrans[i];
+	  rate[i] = ntrans[i*LEN+i];
 	  for(j = 0; j < LEN; j++)
-	    rate[i] += state[j]*ntrans[LEN+j*LEN+i];
+	    rate[i] += state[j]*ntrans[j*LEN+i];
 	  rate[i] = exp(rate[i]);
 	}
       else /* we've already lost this gene */
@@ -78,15 +78,15 @@ void PickLocus(int *state, double *ntrans, int *targ, int *locus, double *prob, 
 
   totrate = 0;
 
-  /* compute the rate of loss of gene i given the current genome */
+  /* compute the rate of loss of gene i given the current genome -- with bias */
   for(i = 0; i < LEN; i++)
     {
-      /* ntrans must be the transition matrix. ntrans[0]-ntrans[LEN] are the bare rates. then ntrans[LEN+j*LEN+i] is the modifier for i from j*/
+      /* ntrans must be the transition matrix. ntrans[i+i*LEN] is the bare rate for i. then ntrans[j*LEN+i] is the modifier for i from j*/
       if(state[i] == 0 && targ[i] != 0)
 	{
-	  rate[i] = ntrans[i];
+	  rate[i] = ntrans[i*LEN+i];
 	  for(j = 0; j < LEN; j++)
-	    rate[i] += state[j]*ntrans[LEN+j*LEN+i];
+	    rate[i] += state[j]*ntrans[j*LEN+i];
 	  rate[i] = exp(rate[i]);
 	}
       else /* we've already lost this gene OR WE DON'T WANT IT*/
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
   }while(!feof(fp));
   if(csv) len /= 2;
   ntarg = i/len;
-  NVAL = len*(len+1);
+  NVAL = len*len;
   fclose(fp);
 
   ntau = ntarg/2;
