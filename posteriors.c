@@ -73,12 +73,12 @@ void GetRoutes(int *matrix, int len, int ntarg, double *ntrans, int *rec, double
 	  // compute the rate for feature i given the current set of features
 	  for(i = 0; i < len; i++)
 	    {
-	      // ntrans stores the transition matrix: ntrans[0]-ntrans[LEN] are the bare rates; ntrans[LEN+j*LEN+i] is the modifier for i from j
+	      // ntrans stores the transition matrix: ntrans[i+i*LEN] is the bare rate for i. then ntrans[j*LEN+i] is the modifier for i from j
 	      if(state[i] == 0)
 		{
-	          rate[i] = ntrans[i];
+	          rate[i] = ntrans[i*len+i];
 	          for(j = 0; j < len; j++)
-		    rate[i] += state[j]*ntrans[len+j*len+i];
+		    rate[i] += state[j]*ntrans[j*len+i];
 		  rate[i] = exp(rate[i]);
 		}
 	      else // we've already lost this gene
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
   len = 0;
   for(i = 1; i < 200; i++)
     {
-      if(tlen == i*(i+1))
+      if(tlen == i*i)
 	{
 	  len = i;
 	  break;
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
       while(!feof(fp))
 	{
 	  // read in single posterior sample
-	  for(i = 0; i < len*(len+1); i++)
+	  for(i = 0; i < len*len; i++)
 	    fscanf(fp, "%lf", &ntrans[i]);
 
 	  // this if statement controls which samples get processed
@@ -388,15 +388,15 @@ int main(int argc, char *argv[])
   // outputs both the original feature ordering and the above mean-sorted references
   sprintf(str, "%s.process", argv[2]);
   fp = fopen(str, "w");
+  fprintf(fp, "Time,ReorderedIndex,OriginalIndex,Probability\n");
   for(t = 0; t < len; t++)
     {
       for(i = 0; i < len; i++)
-	fprintf(fp, "%i %i %i %s %.15f\n", t, i, order[i], &names[FLEN*order[i]], drec[t*len+order[i]]);
-      fprintf(fp, "\n");
+	fprintf(fp, "%i,%i,%i,%.15f\n", t, i, order[i], drec[t*len+order[i]]);
     }
 
   // these appended comments give gnuplot commands for axis labels if required: both in original and mean-sorted orderings
-  fprintf(fp, "# set xtics (");
+  /*  fprintf(fp, "# set xtics (");
   for(i = 0; i < len; i++)
     fprintf(fp, "\"%s\" %i%c", &names[FLEN*order[i]], i, (i == len-1 ? ')' : ','));
   fprintf(fp, "\n");
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
   fprintf(fp, "# ");
   for(i = 0; i < len; i++)
     fprintf(fp, "%s %.4f, ", &names[FLEN*order[i]], mean[i]);
-  fprintf(fp, ")\n");
+    fprintf(fp, ")\n");*/
 
   fclose(fp);
 
