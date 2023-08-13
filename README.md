@@ -4,7 +4,7 @@ Simple, low-level HyperTraPS code for projects
 Summary 
 ---
 
-HyperTraPS (hypercubic transition path sampling) is an algorithm for inferring the likely dynamic pathways that give rise to a series of observations. These observations consist of binary strings describing the presence (1) or absence (0) of each of L traits of interest. HyperTraPS can broadly be thought of as a Hidden Markov Model where the state space is the L-hypercube where each vertex is one of these strings and an edge exists between vertices whose strings differ in exactly one place. The -DT appendix stands for "discrete time"; the continuous time analogue is under development.
+HyperTraPS (hypercubic transition path sampling) is an algorithm for inferring the likely dynamic pathways that give rise to a series of observations. These observations consist of binary strings describing the presence (1) or absence (0) of each of L traits of interest. HyperTraPS can broadly be thought of as a Hidden Markov Model where the state space is the L-hypercube where each vertex is one of these strings and an edge exists between vertices whose strings differ in exactly one place. 
 
 If you use HyperTraPS please cite the original paper Johnston & Williams, Cell Systems 2, 101-111 (2016), and/or the methods paper Greenbury et al., Cell Systems 10, 39-51 (2020).
 
@@ -17,9 +17,9 @@ If you're running a Linux-like command line with gcc, the quickest way to get Hy
 then run it with
 `./demo.sh`
 
-This compiles and runs the source code, and runs a quick instance of HyperTraPS on an example synthetic data file. If Gnuplot is installed it will also produce a summary plot.
+This compiles and runs the source code, and runs a quick instance of HyperTraPS on an example synthetic data file. If R with ggplot2 is installed it will also produce a summary plot.
 
-IMPORTANT NOTE: this simple demo script performs NO checking about the performance of HyperTraPS. This is a really simple test file and the parameters used will not in general be sufficient to get converged results for bigger/more complex data. The script `demo-parallel-dt.sh` runs several chains in parallel and visualises the corresponding output as a first check for convergence; better approaches like Gelman-Rubin are recommended in more formal settings.
+IMPORTANT NOTE: this simple demo script performs NO checking about the performance of HyperTraPS. This is a really simple test file and the parameters used will not in general be sufficient to get converged results for bigger/more complex data. The script `demo-parallel.sh` runs several chains in parallel and visualises the corresponding output as a first check for convergence; better approaches like Gelman-Rubin are recommended in more formal settings.
 
 Running Windows? You'll need to compile the source code below and run it via the command line; unfortunately this Bash script won't work in Windows.
 
@@ -100,7 +100,7 @@ Example phylogenetic data:
 * 1001000 -> 1001000 (NB)
 * 1001000 -> 1001001 
 
-(NB) note that "before" and "after" states here are identical, indicating an absence of any transition. Such observations are not used by HyperTraPS-DT (but are used in continuous-time HyperTraPS).
+(NB) note that "before" and "after" states here are identical, indicating an absence of any transition. Such observations are not used by HyperTraPS in discrete time (but are used in continuous-time HyperTraPS).
 
 The data file input to HyperTraPS has two options:
 
