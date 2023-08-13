@@ -13,7 +13,7 @@
 #define _MAXN 2000
 
 // number of trajectories N_h, and frequencies of sampling for posteriors and for output
-#define BANK 2000
+#define BANK 200
 #define TMODULE 100
 
 #define _EVERYITERATION 0
@@ -57,15 +57,15 @@ void PickLocus(int *state, double *ntrans, int *targ, int *locus, double *prob, 
   
   nobiastotrate = 0;
 
-  /* compute the rate of loss of gene i given the current genome */
+  /* compute the rate of loss of gene i given the current genome -- without bias */
   for(i = 0; i < LEN; i++)
     {
-      /* ntrans must be the transition matrix. ntrans[0]-ntrans[LEN] are the bare rates. then ntrans[LEN+j*LEN+i] is the modifier for i from j*/
+      /* ntrans must be the transition matrix. ntrans[i+i*LEN] is the bare rate for i. then ntrans[j*LEN+i] is the modifier for i from j*/
       if(state[i] == 0)
 	{
-	  rate[i] = ntrans[i];
+	  rate[i] = ntrans[i*LEN+i];
 	  for(j = 0; j < LEN; j++)
-	    rate[i] += state[j]*ntrans[LEN+j*LEN+i];
+	    rate[i] += state[j]*ntrans[j*LEN+i];
 	  rate[i] = exp(rate[i]);
 	}
       else /* we've already lost this gene */
@@ -78,15 +78,15 @@ void PickLocus(int *state, double *ntrans, int *targ, int *locus, double *prob, 
 
   totrate = 0;
 
-  /* compute the rate of loss of gene i given the current genome */
+  /* compute the rate of loss of gene i given the current genome -- with bias */
   for(i = 0; i < LEN; i++)
     {
-      /* ntrans must be the transition matrix. ntrans[0]-ntrans[LEN] are the bare rates. then ntrans[LEN+j*LEN+i] is the modifier for i from j*/
+      /* ntrans must be the transition matrix. ntrans[i+i*LEN] is the bare rate for i. then ntrans[j*LEN+i] is the modifier for i from j*/
       if(state[i] == 0 && targ[i] != 0)
 	{
-	  rate[i] = ntrans[i];
+	  rate[i] = ntrans[i*LEN+i];
 	  for(j = 0; j < LEN; j++)
-	    rate[i] += state[j]*ntrans[LEN+j*LEN+i];
+	    rate[i] += state[j]*ntrans[j*LEN+i];
 	  rate[i] = exp(rate[i]);
 	}
       else /* we've already lost this gene OR WE DON'T WANT IT*/
@@ -332,13 +332,16 @@ int main(int argc, char *argv[])
   int lengthindex, kernelindex;
   int SAMPLE;
   int losses;
-
+  char header[10000];
+  int csv;
+  char likstr[100];
+  
   printf("\nHyperTraPS\n\n");
   
   // process command-line arguments
   if(argc != 6)
     {
-      printf("Usage:\n   hypertraps-dt.ce [observations-file] [random number seed] [length index] [kernel index] [considering losses (1) or gains (0)]\n\n");
+      printf("Usage:\n   hypertraps-dt.ce [observations-file] [random number seed] [length index (10^(n+2))] [kernel index (2-7 lo-hi)] [considering losses (1) or gains (0)]\n\n");
       return 0;
     }
   seed = atoi(argv[2]);
@@ -346,7 +349,7 @@ int main(int argc, char *argv[])
   kernelindex = atoi(argv[4]);
   losses = atoi(argv[5]);
 
-  printf("Running with:\n[observations-file]: %s\n[random number seed]: %i\n[length index]: %i\n[kernel index]: %i\n[losses (1) or gains (0)]: %i\n", argv[1], seed, lengthindex, kernelindex, losses);
+  printf("Running with:\n[observations-file]: %s\n[random number seed]: %i\n[length index (10^(n+2))]: %i\n[kernel index (2-7 lo-hi)]: %i\n[losses (1) or gains (0)]: %i\n", argv[1], seed, lengthindex, kernelindex, losses);
 
   // initialise and allocate
   maxt = (lengthindex == 1 ? 1000 : (lengthindex == 2 ? 10000 : lengthindex == 3 ? 100000 : (lengthindex == 4 ? 1000000 : 100)));
@@ -363,13 +366,21 @@ int main(int argc, char *argv[])
   switch(expt)
     {
     case 0: DELTA = 0; break;
-    case 1: DELTA = 0.005; MU = 0.1; break;
-    case 2: DELTA = 0.05; MU = 1.; break;
+    case 1: DELTA = 0.005; MU = 1; break;
+    case 2: DELTA = 0.01; MU = 1.; break;
     case 3: DELTA = 0.05; MU = 1.; break;
     case 4: DELTA = 0.1; MU = 1.; break;
     case 5: DELTA = 0.25; MU = 1.; break;
     case 6: DELTA = 0.5; MU = 1.; break;
-    default: DELTA = 0.75; MU = 1.; break;
+    case 7: DELTA = 0.75; MU = 1.; break;
+    case 11: DELTA = 0.005; MU = 0.1; break;
+    case 12: DELTA = 0.01; MU = 0.1; break;
+    case 13: DELTA = 0.05; MU = 0.1; break;
+    case 14: DELTA = 0.1; MU = 0.1; break;
+    case 15: DELTA = 0.25; MU = 0.1; break;
+    case 16: DELTA = 0.5; MU = 0.1; break;
+    case 17: DELTA = 0.75; MU = 0.1; break;
+
     }
   
   // read data on changes from input file
@@ -380,19 +391,29 @@ int main(int argc, char *argv[])
       printf("Couldn't find observations file %s\n", argv[1]);
       return 0;
     }
-  i = 0; len = 0;
+  i = 0; len = 0; csv = 0;
   do{
     ch = fgetc(fp);
+    if((ch != '0' && ch != '1' && ch != '2' && ch != ' ' && ch != '\t' && ch != '\n') && i == 0)
+      {
+	printf("Found non-digit character before any entries: interpreting as CSV file format\n");
+	csv = 1;
+	rewind(fp);
+	do{ch = fgetc(fp); if(ch != '\n') header[i++] = ch; }while(ch != '\n');
+	i = 0;
+	ch = '\n';
+      }
     switch(ch)
       {
       case '0': matrix[i++] = (losses == 1 ? 1 : 0); break;
       case '1': matrix[i++] = (losses == 1 ? 0 : 1); break;
       case '2': matrix[i++] = 2; break;
-      case '\n': if(len == 0) len = i; break;
+      case '\n': if(len == 0) len = i; if(csv) { do{ch=fgetc(fp);}while(!feof(fp) && ch != ','); do{ch=fgetc(fp);}while(!feof(fp) && ch != ','); } break;
       }
   }while(!feof(fp));
+  if(csv) len /= 2;
   ntarg = i/len;
-  NVAL = len*(len+1);
+  NVAL = len*len;
   fclose(fp);
 
   ntau = ntarg/2;
@@ -427,6 +448,8 @@ int main(int argc, char *argv[])
   fp = fopen(shotstr, "w"); fclose(fp);
   sprintf(bestshotstr, "%s-best-%i-%i-%i-%i.txt", argv[1], spectrumtype, seed, lengthindex, kernelindex);
   fp = fopen(bestshotstr, "w"); fclose(fp);
+  sprintf(likstr, "%s-lik-%i-%i-%i-%i.txt", argv[1], spectrumtype, seed, lengthindex, kernelindex);
+  fp = fopen(likstr, "w"); fprintf(fp, "Step,LogLikelihood\n"); fclose(fp);
 
   // initialise with an agnostic transition matrix
   for(i = 0; i < len; i++)
@@ -474,10 +497,15 @@ int main(int argc, char *argv[])
 	{
 	  // if we're burnt in, periodically sample the current parameterisation to an output file
 	  fp = fopen(shotstr, "a");
-	  for(i = 0; i < len*(len+1); i++)
+	  for(i = 0; i < len*len; i++)
 	    fprintf(fp, "%f ", trans[i]);
 	  fprintf(fp, "\n");
 	  fclose(fp);
+ 	  fp = fopen(likstr, "a");
+          fprintf(fp, "%i,%f\n", t, lik);
+	  fprintf(fp, "\n");
+	  fclose(fp);
+
 	}
 
       // apply a perturbation to the existing parameterisation

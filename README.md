@@ -4,40 +4,40 @@ Simple, low-level HyperTraPS code for projects
 Summary 
 ---
 
-HyperTraPS (hypercubic transition path sampling) is an algorithm for inferring the likely dynamic pathways that give rise to a series of observations. These observations consist of binary strings describing the presence (1) or absence (0) of each of L traits of interest. HyperTraPS can broadly be thought of as a Hidden Markov Model where the state space is the L-hypercube where each vertex is one of these strings and an edge exists between vertices whose strings differ in exactly one place. The -DT appendix stands for "discrete time"; the continuous time analogue is under development.
+HyperTraPS (hypercubic transition path sampling) is an algorithm for inferring the likely dynamic pathways that give rise to a series of observations. These observations consist of binary strings describing the presence (1) or absence (0) of each of L traits of interest. HyperTraPS can broadly be thought of as a Hidden Markov Model where the state space is the L-hypercube where each vertex is one of these strings and an edge exists between vertices whose strings differ in exactly one place. 
 
 If you use HyperTraPS please cite the original paper Johnston & Williams, Cell Systems 2, 101-111 (2016), and/or the methods paper Greenbury et al., Cell Systems 10, 39-51 (2020).
 
 Getting Started 
 ---
 
-If you're running a Linux-like command line with gcc, the quickest way to get HyperTraPS running is to use the `demo-dt.sh` script. You may need to mark it as executable:
-`chmod +x demo-dt.sh`
+If you're running a Linux-like command line with gcc, the quickest way to get HyperTraPS running is to use the `demo.sh` script. You may need to mark it as executable:
+`chmod +x demo.sh`
 
 then run it with
-`./demo-dt.sh`
+`./demo.sh`
 
-This compiles and runs the source code, and runs a quick instance of HyperTraPS on an example synthetic data file. If Gnuplot is installed it will also produce a summary plot.
+This compiles and runs the source code, and runs a quick instance of HyperTraPS on an example synthetic data file. If R with ggplot2 is installed it will also produce a summary plot.
 
-IMPORTANT NOTE: this simple demo script performs NO checking about the performance of HyperTraPS. This is a really simple test file and the parameters used will not in general be sufficient to get converged results for bigger/more complex data. The script `demo-parallel-dt.sh` runs several chains in parallel and visualises the corresponding output as a first check for convergence; better approaches like Gelman-Rubin are recommended in more formal settings.
+IMPORTANT NOTE: this simple demo script performs NO checking about the performance of HyperTraPS. This is a really simple test file and the parameters used will not in general be sufficient to get converged results for bigger/more complex data. The script `demo-parallel.sh` runs several chains in parallel and visualises the corresponding output as a first check for convergence; better approaches like Gelman-Rubin are recommended in more formal settings.
 
 Running Windows? You'll need to compile the source code below and run it via the command line; unfortunately this Bash script won't work in Windows.
 
 Code and I/O 
 ---
 
-`hypertraps-dt.c` is C source code for HyperTraPS inference.
+`hypertraps.c` is C source code for HyperTraPS inference.
 `posteriors.c` is C source code for the subsequent analysis of HyperTraPS posteriors.
 
 In Linux, at the command line, compile both with gcc and link the math library:
-`gcc -o3 hypertraps-dt.c -lm -o hypertraps-dt.ce`
+`gcc -o3 hypertraps.c -lm -o hypertraps.ce`
 `gcc -o3 posteriors.c -lm -o posteriors.ce`
 
 Invoke HyperTraPS with
-`./hypertraps-dt.ce [datafile] [random number seed] [length index] [kernel index] [direction index]`
+`./hypertraps.ce [datafile] [random number seed] [length index] [kernel index] [direction index]`
 
 for example
-`./hypertraps-dt.ce fake-cross-samples-1.txt 1 1 5 0`
+`./hypertraps.ce fake-cross-samples-1.txt 1 1 5 0`
 
 This will produce an output file `[datafile]-posterior-0-[random number seed]-[length index]-[kernel index].txt`. This file contains samples from the posterior distribution that HyperTraPS has learned from the data. Use the analysis code on this with
 `./posteriors.ce 0 [output file]`
@@ -100,9 +100,11 @@ Example phylogenetic data:
 * 1001000 -> 1001000 (NB)
 * 1001000 -> 1001001 
 
-(NB) note that "before" and "after" states here are identical, indicating an absence of any transition. Such observations are not used by HyperTraPS-DT (but are used in continuous-time HyperTraPS).
+(NB) note that "before" and "after" states here are identical, indicating an absence of any transition. Such observations are not used by HyperTraPS in discrete time (but are used in continuous-time HyperTraPS).
 
-The data file input to HyperTraPS contains these transitions arranged in pairs of rows, so that each odd-numbered row contains a "before" state and the subsequent even-number row contains the corresponding "after" state. Presence/absence markers are separated by spaces. So our first example would be 
+The data file input to HyperTraPS has two options:
+
+_Unlabelled_ -- contains these transitions arranged in pairs of rows, so that each odd-numbered row contains a "before" state and the subsequent even-number row contains the corresponding "after" state. Presence/absence markers are separated by spaces. So our first example would be 
 ```
 0 0 0 0 0 0 0  
 1 0 0 1 0 1 0  
@@ -110,6 +112,13 @@ The data file input to HyperTraPS contains these transitions arranged in pairs o
 1 0 0 0 1 0 1  
 0 0 0 0 0 0 0  
 0 1 1 0 1 0 1
+```
+
+_CSV format_ -- comma-separated value file with a header line and exactly these columns: Label of "before" observation | Label of "after" observation | the L traits of the "before" observation | the L traits of the "after observation". For example, with a simpler example than above for brevity:
+```
+Ancestor,Descendant,A.trait1,A.trait2,A.trait3,D.trait1,D.trait2,D.trait3
+Node_1,Node_2,0,0,0,0,0,1
+Node_2,Node_3,0,0,1,0,1,1
 ```
 
 Output files 
