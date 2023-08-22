@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
 	{
 	  bestlik = lik;
 	  fp = fopen(bestshotstr, "w");
-	  for(i = 0; i < len*(len+1); i++)
+	  for(i = 0; i < len*len; i++)
 	    fprintf(fp, "%f ", trans[i]);
 	  fprintf(fp, "\n");
 	  fclose(fp);
